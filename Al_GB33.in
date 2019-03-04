@@ -1,0 +1,52 @@
+# 3d metal uniaxial load simulation
+
+variable etol equal 1.0e-25 
+variable ftol equal 1.0e-25 
+variable maxiter equal 50000 
+variable maxeval equal 10000  
+
+units           metal
+boundary        s s s
+
+atom_style      atomic
+
+read_data       datafile_GB33
+
+pair_style      eam/alloy
+pair_coeff      * * Al99.eam.alloy Al Al
+
+neighbor        0.5 bin
+neigh_modify    delay 0 every 1 check yes
+
+
+##############################################
+
+##### this lines should be in#########
+
+
+
+######################
+#compute 1 all centro/atom fcc
+#compute 2 all displace/atom 
+
+#compute 3 all reduce sum c_2
+
+#dump            330 all xyz 500 GB15.xyz
+dump 1 all custom 200 GB33.xyz id type x y z
+variable natoms equal "count(all)" 
+
+
+reset_timestep 0 
+thermo 50 
+thermo_style custom step pe press lx ly lz vol temp
+timestep        0.001
+min_style       cg
+minimize        ${etol} ${ftol} ${maxiter} ${maxeval}
+
+
+print "${natoms}"
+
+#velocity all create 1 95812384 
+#fix 1 all nvt temp 1.0 1.0 100.0 
+#run 1000
+ 
